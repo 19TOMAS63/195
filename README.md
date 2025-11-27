@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contador 195</title>
+    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/992/992700.png" type="image/png">
+    <style>
+        body {
+            font-family: "Segoe UI", Arial, sans-serif;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 60px auto;
+            background: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            padding: 30px 20px;
+        }
+
+        h1 {
+            color: #343a40;
+            margin-bottom: 10px;
+        }
+
+        #contador {
+            font-size: 90px;
+            font-weight: bold;
+            margin: 20px 0;
+            transition: color 0.3s ease;
+        }
+
+        .botones {
+            margin-bottom: 20px;
+        }
+
+        button {
+            font-size: 18px;
+            padding: 10px 22px;
+            margin: 5px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            color: #fff;
+            transition: all 0.3s ease;
+        }
+
+        #restar { background-color: #007bff; }
+        #restar:hover { background-color: #0056b3; }
+
+        #reiniciar { background-color: #28a745; }
+        #reiniciar:hover { background-color: #1e7e34; }
+
+        #exportar { background-color: #6c757d; }
+        #exportar:hover { background-color: #343a40; }
+
+        #historial {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: left;
+            max-height: 250px;
+            overflow-y: auto;
+            box-shadow: inset 0 0 6px rgba(0,0,0,0.1);
+        }
+
+        #historial h3 {
+            margin-top: 0;
+            color: #495057;
+        }
+
+        #historial ul {
+            list-style-type: none;
+            padding-left: 0;
+            margin: 0;
+        }
+
+        #historial li {
+            font-size: 15px;
+            border-bottom: 1px solid #dee2e6;
+            padding: 4px 0;
+        }
+
+        footer {
+            font-size: 13px;
+            color: #6c757d;
+            margin-top: 25px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Contador Manual</h1>
+        <div id="contador">195</div>
+
+        <div class="botones">
+            <button id="restar" onclick="decrementar()">Restar 1</button>
+            <button id="reiniciar" onclick="reiniciar()">Reiniciar</button>
+            <button id="exportar" onclick="exportarHistorial()">Exportar</button>
+        </div>
+
+        <div id="historial">
+            <h3>Registro de pulsaciones</h3>
+            <ul id="lista"></ul>
+        </div>
+
+        <footer>© 2025 Contador 195</footer>
+    </div>
+
+    <script>
+        let numero = parseInt(localStorage.getItem('contador')) || 195;
+        let historial = JSON.parse(localStorage.getItem('historial')) || [];
+
+        const contadorEl = document.getElementById('contador');
+        const listaEl = document.getElementById('lista');
+
+        function actualizarColor() {
+            if (numero > 100) contadorEl.style.color = '#28a745';
+            else if (numero > 50) contadorEl.style.color = '#ffc107';
+            else if (numero > 20) contadorEl.style.color = '#fd7e14';
+            else contadorEl.style.color = '#dc3545';
+        }
+
+        function actualizarPantalla() {
+            contadorEl.innerText = numero;
+            actualizarColor();
+            listaEl.innerHTML = historial.map(item => `<li>${item}</li>`).join('');
+        }
+
+        function decrementar() {
+            if (numero > 0) {
+                numero--;
+                const fecha = new Date();
+                const registro = `${fecha.toLocaleDateString()} ${fecha.toLocaleTimeString()} → ${numero}`;
+                historial.unshift(registro);
+                guardarDatos();
+                actualizarPantalla();
+            }
+        }
+
+        function reiniciar() {
+            if (confirm("¿Seguro que quieres reiniciar el contador y borrar el historial?")) {
+                numero = 195;
+                historial = [];
+                guardarDatos();
+                actualizarPantalla();
+            }
+        }
+
+        function guardarDatos() {
+            localStorage.setItem('contador', numero);
+            localStorage.setItem('historial', JSON.stringify(historial));
+        }
+
+        function exportarHistorial() {
+            if (historial.length === 0) {
+                alert("No hay datos en el historial para exportar.");
+                return;
+            }
+
+            let contenido = "Fecha y hora,Valor\n";
+            historial.forEach(item => {
+                const partes = item.split(" → ");
+                contenido += `"${partes[0]}","${partes[1]}"\n`;
+            });
+
+            const blob = new Blob([contenido], { type: "text/csv;charset=utf-8;" });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = "historial_contador.csv";
+            link.click();
+        }
+
+        actualizarPantalla();
+    </script>
+</body>
+</html>
